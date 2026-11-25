@@ -458,3 +458,70 @@ python -m pytest tests/ -q
 stderr:
 (empty)
 ```
+
+## Fault 4: Bash cp bypasses the Edit/Write hook
+
+The helper changes the first row's cnt by one in an isolated replacement file, then really runs Bash cp into the disposable data/raw/. The Bash payload contains no Edit/Write file_path; the PostToolUse guard exits 0 without checking. The new SHA-256 check in load_raw/make data rejects the copy. A Stop hook running the same check, a Bash PreToolUse guard, or filesystem restrictions could provide additional boundaries. No submission raw bytes were modified. Exact cp outcome, hook stderr, hash failure and restoration:
+
+```text
+Fault: raw-bash
+Harness: direct JSON hook invocation; not a Claude Code session.
+
+$ Bash: cp "$1" "$2"
+exit=0
+stdout:
+(empty)
+stderr:
+(empty)
+
+Exact seeded diff:
+--- data/raw/bike_daily.csv
++++ data/raw/bike_daily.csv
+@@ -1,5 +1,5 @@
+ "instant","dteday","season","yr","mnth","holiday","weekday","temp","atemp","hum","windspeed","casual","registered","cnt","workday","weather","days_since_2011","cnt_2d_bfr"
+-3,"2011-01-03","WINTER","2011","JAN","N","MON",1.229108,22.43977,43.7273,16.636703,120,1229,1349,"Y","GOOD",2,985
++3,2011-01-03,WINTER,2011,JAN,N,MON,1.229108,22.43977,43.7273,16.636703,120,1229,1350,Y,GOOD,2,985
+ 4,"2011-01-04","WINTER","2011","JAN","N","TUE",1.4,23.212148,59.0435,10.739832,108,1454,1562,"Y","GOOD",3,801
+ 5,"2011-01-05","WINTER","2011","JAN","N","WED",2.666979,23.79518,43.6957,12.5223,82,1518,1600,"Y","GOOD",4,1349
+ 6,"2011-01-06","WINTER","2011","JAN","N","THU",1.604356,23.929106,51.8261,6.0008684,88,1518,1606,"Y","GOOD",5,1562
+
+
+$ PostToolUse check_leakage.sh < payload.json
+exit=0
+stdout:
+(empty)
+stderr:
+(empty)
+
+$ make data
+exit=2
+stdout:
+python -m src.ingest
+
+stderr:
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/private/var/folders/wv/4rdwzt8n1_s6lh7md0cr5msm0000gn/T/bikeshare-raw-bash-f6r2x9ge/repo/src/ingest.py", line 52, in <module>
+    df = load_raw()
+  File "/private/var/folders/wv/4rdwzt8n1_s6lh7md0cr5msm0000gn/T/bikeshare-raw-bash-f6r2x9ge/repo/src/ingest.py", line 39, in load_raw
+    verify_raw_hash()
+    ~~~~~~~~~~~~~~~^^
+  File "/private/var/folders/wv/4rdwzt8n1_s6lh7md0cr5msm0000gn/T/bikeshare-raw-bash-f6r2x9ge/repo/src/ingest.py", line 35, in verify_raw_hash
+    raise ValueError(f"raw SHA-256 mismatch: expected {RAW_SHA256}, got {actual}")
+ValueError: raw SHA-256 mismatch: expected a6bed1577f6e4de56dcfae6d8315985073cc0ad3446c8c99ed60c86a0b5ad9dc, got bf4fceabfe2ea3a55c5392a175a7de7a6e9282feb860bc9ae9e652ef30d9101b
+make: *** [data] Error 1
+
+
+Repair attempts: 1 (restore the exact pre-fault bytes).
+
+$ make test (after restoration)
+exit=0
+stdout:
+python -m pytest tests/ -q
+.........................                                                [100%]
+25 passed in 2.03s
+
+stderr:
+(empty)
+```
