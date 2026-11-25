@@ -1,13 +1,14 @@
 ---
 name: seed-fault
 description: Exercise a bikeshare guard with a deliberate fault, capture real test and hook output, and verify the restored pipeline. Use for the assignment's repeated fault experiments.
-allowed-tools: Read, Bash(python tools/seed_fault.py*), Bash(make test*)
+allowed-tools: Read, Edit, Bash(python tools/seed_fault.py*), Bash(.venv/bin/python tools/seed_fault.py*), Bash(make test*), Bash(git add*), Bash(git commit*)
 ---
 
 # Seed a fault: $ARGUMENTS
 
 Use one of `forbidden`, `rolling`, `weather`, or `raw-bash` as the argument.
-Run `python tools/seed_fault.py $ARGUMENTS` from the repository root.
+Run `.venv/bin/python tools/seed_fault.py $ARGUMENTS` from the repository
+root when that environment exists; otherwise use the active `python`.
 The helper mutates an isolated temporary copy, invokes the real hook using
 a JSON tool payload, records the diff and unedited output under
 `reports/faults/`, restores the copy, and verifies the restored tests.
