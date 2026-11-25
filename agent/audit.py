@@ -183,6 +183,14 @@ REPORT_SCHEMA = {
 async def audit_repo(repo: Path) -> dict[str, Any]:
     repo = repo.resolve()
     transcript = []
+    settings_path = repo / ".claude/settings.json"
+    settings = json.loads(settings_path.read_text()) if settings_path.exists() else {}
+    endpoint_env = {"ANTHROPIC_BASE_URL": "http://localhost:11434",
+                    "ANTHROPIC_AUTH_TOKEN": "ollama", "ANTHROPIC_API_KEY": ""}
+    endpoint_env.update(settings.get("env", {}))
+    for key in ("ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"):
+        if key in os.environ:
+            endpoint_env[key] = os.environ[key]
     options = ClaudeAgentOptions(
         system_prompt=SYSTEM,
         cwd=str(repo),
@@ -200,7 +208,7 @@ async def audit_repo(repo: Path) -> dict[str, Any]:
         disallowed_tools=["Write", "Edit", "Bash", "NotebookEdit", "WebSearch", "WebFetch"],
         setting_sources=["project"],
         strict_mcp_config=True,
-        env={"CLAUDE_CONFIG_DIR": str(repo / ".claude/runtime"),
+        env={**endpoint_env, "CLAUDE_CONFIG_DIR": str(repo / ".claude/runtime"),
              "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"},
         permission_mode="default",
         max_turns=40,
