@@ -1,0 +1,40 @@
+$ pytest tests/test_contract.py::test_exact_retained_dates_have_complete_calendar_history -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_exact_retained_dates_have_complete_calendar_history ___________
+
+raw =      instant     dteday  season  ...  weather days_since_2011 cnt_2d_bfr
+0          3 2011-01-03  WINTER  ...     GOOD...       729       3095
+727      731 2012-12-31  WINTER  ...    MISTY             730       1341
+
+[728 rows x 18 columns]
+feats =      instant     dteday  season  ...  cnt_lag_7   cnt_roll_7   cnt_roll_3
+0         10 2011-01-10  WINTER  ...     134....142857  2183.333333
+720      731 2012-12-31  WINTER  ...      920.0  1531.428571  2077.333333
+
+[721 rows x 29 columns]
+
+    def test_exact_retained_dates_have_complete_calendar_history(raw, feats):
+        """A row shift across the missing day must not pass the row-loss upper bound."""
+        observed = set(raw.dteday)
+        expected = {
+            day for day in observed
+            if all(day - pd.Timedelta(days=k) in observed
+                   for k in range(1, LAG_WARMUP + 1))
+        }
+>       assert set(feats.dteday) == expected
+E       AssertionError: assert {Timestamp('2...:00:00'), ...} == {Timestamp('2...:00:00'), ...}
+E         
+E         Extra items in the left set:
+E         Timestamp('2011-03-15 00:00:00')
+E         Timestamp('2011-03-11 00:00:00')
+E         Timestamp('2011-03-17 00:00:00')
+E         Timestamp('2011-03-13 00:00:00')
+E         Timestamp('2011-03-12 00:00:00')...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests/test_contract.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_contract.py::test_exact_retained_dates_have_complete_calendar_history
+1 failed in 2.72s
