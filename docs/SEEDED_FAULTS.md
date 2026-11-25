@@ -167,3 +167,120 @@ FAILED tests/test_leakage.py::test_three_day_mean_uses_only_prior_calendar_dates
 ```
 
 After implementation: `make features test` reported 714 feature rows and `19 passed in 2.13s`.
+
+## Fault 1: bypass forbidden-column filtering
+
+One controlled Codex restoration action; no Claude conversation-turn count was measured. The helper invokes the hook before the separate red pytest run. Exact diff, stdout and hook stderr follow.
+
+```text
+Fault: forbidden
+Harness: direct JSON hook invocation; not a Claude Code session.
+
+Exact seeded diff:
+--- src/features.py
++++ src/features.py
+@@ -84,7 +84,7 @@
+     """Safe model inputs; rejected candidates can be evaluated explicitly."""
+     numeric = [c for c in df.select_dtypes(include="number").columns
+                if include_rejected or c not in REJECTED_FEATURES]
+-    return [c for c in numeric if c not in FORBIDDEN]
++    return list(numeric)  # seeded fault: bypass FORBIDDEN
+ 
+ 
+ if __name__ == "__main__":
+
+
+$ PostToolUse check_leakage.sh < payload.json
+exit=2
+stdout:
+(empty)
+stderr:
+Leakage tests failed after editing /var/folders/wv/4rdwzt8n1_s6lh7md0cr5msm0000gn/T/bikeshare-forbidden-2vocl8ns/repo/src/features.py:
+[714 rows x 29 columns]
+
+    def test_no_single_feature_or_pair_exactly_restates_target(feats):
+        """Inspect values, so renaming a leaked predictor does not defeat the check."""
+        cols = feature_columns(feats)
+        y = feats[TARGET].to_numpy(dtype=float)
+        for size in (1, 2):
+            for subset in combinations(cols, size):
+                X = np.column_stack([feats[list(subset)].to_numpy(dtype=float), np.ones(len(y))])
+                coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+                residual = float(np.max(np.abs(X @ coef - y)))
+>               assert residual > 1e-6, f"target identity in {subset}: max residual={residual}"
+E               AssertionError: target identity in ('cnt',): max residual=1.8189894035458565e-12
+E               assert 1.8189894035458565e-12 > 1e-06
+
+tests/test_leakage.py:94: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_leakage.py::test_no_forbidden_features - AssertionError: fo...
+FAILED tests/test_leakage.py::test_no_single_feature_or_pair_exactly_restates_target
+2 failed, 8 passed in 1.06s
+
+
+$ python -m pytest tests/test_leakage.py -q
+exit=1
+stdout:
+.F.......F                                                               [100%]
+=================================== FAILURES ===================================
+__________________________ test_no_forbidden_features __________________________
+
+feats =         dteday  instant  season  ...  cnt_lag_7   cnt_roll_7   cnt_roll_3
+0   2011-01-10     10.0  WINTER  ...     134....142857  2183.333333
+713 2012-12-31    731.0  WINTER  ...      920.0  1531.428571  2077.333333
+
+[714 rows x 29 columns]
+
+    def test_no_forbidden_features(feats):
+        """Guards the gate, not the data: feature_columns() excludes FORBIDDEN by
+        construction, so this cannot discover a *new* leaky column. What it
+        catches is someone editing feature_columns() or FORBIDDEN -- which is
+        exactly the fault the Step 7 hook demonstrates."""
+        cols = set(feature_columns(feats))
+>       assert not (cols & FORBIDDEN), f"forbidden columns in feature set: {cols & FORBIDDEN}"
+E       AssertionError: forbidden columns in feature set: {'cnt_2d_bfr', 'registered', 'yr', 'days_since_2011', 'cnt', 'instant', 'casual'}
+E       assert not ({'atemp', 'casual', 'cnt', 'cnt_2d_bfr', 'cnt_lag_1', 'cnt_lag_7', ...} & {'casual', 'cnt', 'cnt_2d_bfr', 'days_since_2011', 'instant', 'registered', ...})
+
+tests/test_leakage.py:34: AssertionError
+____________ test_no_single_feature_or_pair_exactly_restates_target ____________
+
+feats =         dteday  instant  season  ...  cnt_lag_7   cnt_roll_7   cnt_roll_3
+0   2011-01-10     10.0  WINTER  ...     134....142857  2183.333333
+713 2012-12-31    731.0  WINTER  ...      920.0  1531.428571  2077.333333
+
+[714 rows x 29 columns]
+
+    def test_no_single_feature_or_pair_exactly_restates_target(feats):
+        """Inspect values, so renaming a leaked predictor does not defeat the check."""
+        cols = feature_columns(feats)
+        y = feats[TARGET].to_numpy(dtype=float)
+        for size in (1, 2):
+            for subset in combinations(cols, size):
+                X = np.column_stack([feats[list(subset)].to_numpy(dtype=float), np.ones(len(y))])
+                coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+                residual = float(np.max(np.abs(X @ coef - y)))
+>               assert residual > 1e-6, f"target identity in {subset}: max residual={residual}"
+E               AssertionError: target identity in ('cnt',): max residual=1.8189894035458565e-12
+E               assert 1.8189894035458565e-12 > 1e-06
+
+tests/test_leakage.py:94: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_leakage.py::test_no_forbidden_features - AssertionError: fo...
+FAILED tests/test_leakage.py::test_no_single_feature_or_pair_exactly_restates_target
+2 failed, 8 passed in 0.52s
+
+stderr:
+(empty)
+
+Repair attempts: 1 (restore the exact pre-fault bytes).
+
+$ make test (after restoration)
+exit=0
+stdout:
+python -m pytest tests/ -q
+...................                                                      [100%]
+19 passed in 2.17s
+
+stderr:
+(empty)
+```
