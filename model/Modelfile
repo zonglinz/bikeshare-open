@@ -1,0 +1,13 @@
+# The agent model for this repo, built by `make model`.
+#
+# Claude Code needs a tool-capable model with a 64k+ context window. Ollama's
+# default context is far smaller, and a context that is too short makes the
+# agent forget CLAUDE.md mid-session -- which looks like the model ignoring
+# rules when it is actually the harness truncating them. Baking num_ctx into
+# a named build means every student gets the same window regardless of their
+# shell environment.
+#
+# Override the base with `make model BASE=qwen3.5:27b` on a machine with
+# 32 GB or more. See README.md for the size table.
+FROM qwen3.5:9b
+PARAMETER num_ctx 65536
