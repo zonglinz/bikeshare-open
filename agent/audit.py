@@ -22,6 +22,10 @@ import asyncio
 import json
 import os
 import sys
+import shutil
+import subprocess
+import tempfile
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
 
@@ -49,8 +53,8 @@ from claude_agent_sdk import (
     {"csv_path": str, "target": str, "candidates": list},
 )
 async def check_identity(args: dict[str, Any]) -> dict[str, Any]:
-    df = pd.read_csv(args["csv_path"])
-    target = df[args["target"]].to_numpy(dtype=float)
+    path = Path(args["csv_path"])
+    df = pd.read_parquet(path) if path.suffix == ".parquet" else pd.read_csv(path)
     cols = [c for c in args["candidates"] if c in df.columns and c != args["target"]]
 
     # Least squares with an intercept column, so `cnt = a*x + b` is caught
@@ -83,8 +87,38 @@ def _combinations(items, r):
     return combinations(items, r)
 
 
+@tool("verify_pipeline", "Run make all and make test in a fresh disposable copy; return actual evidence and selected feature names.", {"repo_path": str})
+async def verify_pipeline(args):
+    def run():
+        repo = Path(args["repo_path"]).resolve()
+        expected = (repo / "reports/metrics.json").read_bytes()
+        with tempfile.TemporaryDirectory(prefix="bikeshare-audit-") as directory:
+            copy = Path(directory) / "repo"
+            shutil.copytree(repo, copy, ignore=shutil.ignore_patterns(
+                ".git", ".venv", "__pycache__", ".pytest_cache", "processed", "reports", "runtime"
+            ))
+            env = os.environ.copy()
+            env.update(OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", LOKY_MAX_CPU_COUNT="1")
+            commands = {}
+            for target in ("all", "test"):
+                result = subprocess.run(["make", f"PYTHON={sys.executable}", target],
+                                        cwd=copy, env=env, capture_output=True, text=True, timeout=120)
+                commands[target] = {"exit": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+            actual = copy / "reports/metrics.json"
+            metrics = json.loads(actual.read_text()) if actual.exists() else {}
+            result = {
+                "commands": commands,
+                "reproduced_metrics_byte_for_byte": actual.exists() and actual.read_bytes() == expected,
+                "selected_features": metrics.get("features", []),
+                "metrics": metrics,
+                "processed_table_for_identity_check": str(repo / "data/processed/features.parquet"),
+            }
+        return {"content": [{"type": "text", "text": json.dumps(result)}]}
+    return await asyncio.to_thread(run)
+
+
 auditor_tools = create_sdk_mcp_server(
-    name="audit", version="1.0.0", tools=[check_identity]
+    name="audit", version="1.1.0", tools=[check_identity, verify_pipeline]
 )
 
 SYSTEM = """\
@@ -92,19 +126,24 @@ You review student data-science repos for methodology errors. You did not
 write this code and you have no stake in it passing.
 
 Check exactly four things:
-  1. Target leakage: any feature that contains, restates, or derives from
-     the target. Use the check_identity tool on the processed feature
-     table rather than judging by column names.
+  1. Target leakage: any selected feature that contains the SAME-DAY target.
+     Past-only target lags are legitimate for one-step rolling prediction.
+     Call verify_pipeline first, then check_identity on its selected_features
+     and processed_table_for_identity_check, target cnt. Retained raw columns
+     casual/registered/cnt in a table are not inputs unless selected.
   2. Temporal validity: splits by date not at random; every rolling or
      lag feature shifts before it aggregates; no transformer is fit on
      validation or test rows.
-  3. Baseline: a mean or naive-persistence baseline reported next to
+  3. Baseline: BOTH mean and naive-persistence baselines reported next to
      every model score.
   4. Reproducibility: the pipeline runs from a documented command and
      random seeds are fixed.
 
 Verify by reading files and running code. Do not accept a docstring or a
 README claim as evidence.
+The pipeline explicitly evaluates conditional on realized same-day weather.
+Note the operational day-ahead limitation if relevant; do not pretend actual
+weather was available earlier. Report only findings changing a conclusion.
 
 Your final answer is a single JSON object matching the schema you were
 given. No prose around it.
@@ -142,22 +181,30 @@ REPORT_SCHEMA = {
 
 
 async def audit_repo(repo: Path) -> dict[str, Any]:
+    repo = repo.resolve()
+    transcript = []
     options = ClaudeAgentOptions(
         system_prompt=SYSTEM,
         cwd=str(repo),
         mcp_servers={"audit": auditor_tools},
+        tools=["Read", "Grep", "Glob"],
         allowed_tools=[
             "Read",
             "Grep",
             "Glob",
-            "Bash",
             "mcp__audit__check_identity",
+            "mcp__audit__verify_pipeline",
         ],
-        # allowed_tools is the boundary. Anything not listed is denied
-        # automatically in a headless run, so the auditor can read and run
-        # but has no Edit or Write to grant.
+        # tools controls exposure; allowed_tools only controls auto-approval.
+        # Deterministic MCP code runs the documented commands in a copy.
+        disallowed_tools=["Write", "Edit", "Bash", "NotebookEdit", "WebSearch", "WebFetch"],
+        setting_sources=["project"],
+        strict_mcp_config=True,
+        env={"CLAUDE_CONFIG_DIR": str(repo / ".claude/runtime"),
+             "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"},
         permission_mode="default",
         max_turns=40,
+        thinking={"type": "disabled"},
         model=os.environ.get("AUDIT_MODEL", "bikeshare-coder"),
         output_format={"type": "json_schema", "schema": REPORT_SCHEMA},
     )
@@ -166,22 +213,50 @@ async def audit_repo(repo: Path) -> dict[str, Any]:
     # intermediate TextBlock ("Let me look at config.py first...") and
     # json.loads-ing the lot fails on the first repo that thinks out loud.
     final: ResultMessage | None = None
-    async for message in query(prompt=f"Audit the repo at {repo}.", options=options):
-        if isinstance(message, ResultMessage):
-            final = message
+    try:
+        async for message in query(prompt=f"Audit the repo at {repo}. Call verify_pipeline, then check_identity on only the returned selected_features. Read src/features.py and src/train.py. Return the report schema.", options=options):
+            transcript.append(asdict(message) if is_dataclass(message) else str(message))
+            if isinstance(message, ResultMessage):
+                final = message
+    finally:
+        log = repo / "reports/audit-transcript.jsonl"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        log.write_text("".join(json.dumps(row, default=str) + "\n" for row in transcript))
 
     if final is None or final.is_error:
         return {"repo": repo.name, "error": "run_failed",
                 "raw": (final.result or "")[:500] if final else ""}
-    if final.structured_output is not None:
-        return {"repo": repo.name, **final.structured_output}
     try:
         # Belt and braces: small open-weight models do not always honour
         # the schema; fall back to parsing the final text.
-        return {"repo": repo.name, **json.loads((final.result or "").strip())}
-    except json.JSONDecodeError:
+        report = final.structured_output
+        if report is None:
+            report = json.loads((final.result or "").strip())
+        validate_report(report)
+        return {**report, "repo": repo.name, "audit_model": options.model, "audit_engine": "claude-agent-sdk"}
+    except (json.JSONDecodeError, ValueError, TypeError) as error:
         # Never let one malformed reply kill a 40-repo run.
-        return {"repo": repo.name, "error": "unparseable", "raw": (final.result or "")[:500]}
+        return {"repo": repo.name, "error": "unparseable", "detail": str(error), "raw": (final.result or "")[:500]}
+
+
+def validate_report(report):
+    if not isinstance(report, dict) or any(key not in report for key in REPORT_SCHEMA["required"]):
+        raise ValueError("missing required report fields")
+    for key in ("temporal_ok", "baseline_reported", "reproducible"):
+        if type(report[key]) is not bool:
+            raise ValueError(f"{key} must be boolean")
+    if report["leakage"] not in {"none", "suspected", "confirmed"}:
+        raise ValueError("invalid leakage verdict")
+    if report["confidence"] not in {"low", "medium", "high"}:
+        raise ValueError("invalid confidence")
+    if not isinstance(report["repo"], str) or not isinstance(report["findings"], list):
+        raise ValueError("invalid repo or findings")
+    for finding in report["findings"]:
+        if not isinstance(finding, dict) or type(finding.get("line")) is not int:
+            raise ValueError("finding must contain an integer line")
+        for key in ("file", "issue", "why_it_matters"):
+            if not isinstance(finding.get(key), str):
+                raise ValueError(f"finding must contain string {key}")
 
 
 async def main() -> None:
@@ -189,15 +264,22 @@ async def main() -> None:
     ap.add_argument("repos", nargs="+", type=Path)
     ap.add_argument("--out", type=Path, default=Path("audit.jsonl"))
     ap.add_argument("--concurrency", type=int, default=4)
+    ap.add_argument("--timeout", type=float, default=600)
     ns = ap.parse_args()
+    if ns.concurrency < 1 or ns.timeout <= 0:
+        ap.error("concurrency and timeout must be positive")
 
     sem = asyncio.Semaphore(ns.concurrency)
 
     async def bounded(repo: Path) -> dict[str, Any]:
         async with sem:
-            return await audit_repo(repo)
+            try:
+                return await asyncio.wait_for(audit_repo(repo), timeout=ns.timeout)
+            except Exception as error:
+                return {"repo": repo.name, "error": type(error).__name__, "detail": str(error)[:500]}
 
     results = await asyncio.gather(*(bounded(r) for r in ns.repos))
+    ns.out.parent.mkdir(parents=True, exist_ok=True)
     with ns.out.open("w") as fh:
         for row in results:
             fh.write(json.dumps(row) + "\n")

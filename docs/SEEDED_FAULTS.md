@@ -525,3 +525,36 @@ python -m pytest tests/ -q
 stderr:
 (empty)
 ```
+
+## Passing-source and non-source hook cases
+
+Direct payload smoke tests; both returned 0 with empty stdout and stderr. The three broken-source cases above returned 2.
+
+```json
+[
+  {
+    "case": "passing-src",
+    "payload": {
+      "tool_name": "Edit",
+      "tool_input": {
+        "file_path": "/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/src/features.py"
+      }
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "case": "non-src",
+    "payload": {
+      "tool_name": "Edit",
+      "tool_input": {
+        "file_path": "/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/README.md"
+      }
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]
+```

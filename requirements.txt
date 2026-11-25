@@ -1,3 +1,5 @@
+# Verified with Python 3.13; NumPy below requires Python >=3.12.
+-c requirements-lock.txt
 # Pinned so `make all` reproduces reports/metrics.json to the printed digit.
 # HistGradientBoostingRegressor in particular changes results across
 # scikit-learn releases; an unpinned install will drift the hgb row.

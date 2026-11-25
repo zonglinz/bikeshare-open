@@ -1,0 +1,44 @@
+{
+  "splits": {
+    "train": {
+      "n": 348,
+      "min": 431,
+      "max": 6043,
+      "mean": 3493.4540229885056
+    },
+    "valid": {
+      "n": 182,
+      "min": 1027,
+      "max": 8362,
+      "mean": 5152.06043956044
+    },
+    "test": {
+      "n": 184,
+      "min": 22,
+      "max": 8714,
+      "mean": 6042.940217391304
+    }
+  },
+  "test_fraction_above_training_max": 0.5652173913043478,
+  "hgb_test_prediction_range": [
+    1055.0082815525834,
+    5536.96337280342
+  ],
+  "ridge_standardized_coefficients": {
+    "temp": 199.98393229792035,
+    "atemp": 46.21945368154851,
+    "hum": -117.27130845121594,
+    "windspeed": -156.01471446973255,
+    "dayofweek": -6.818782383649167,
+    "is_weekend": -5.300752509617228,
+    "is_holiday": -62.5717656971594,
+    "is_workday": 27.69482924640027,
+    "month_sin": -28.479983681186727,
+    "month_cos": -14.361415299494672,
+    "weather_severity": -279.9318956035723,
+    "cnt_lag_1": 361.641470433141,
+    "cnt_lag_7": -40.96905690148182,
+    "cnt_roll_7": 566.9450471813907
+  },
+  "weather_availability": "Conditional evaluation uses realized same-day weather; day-ahead deployment requires issued forecasts."
+}

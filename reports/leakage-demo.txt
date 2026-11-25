@@ -1,0 +1,6 @@
+Features: ['casual', 'registered', 'temp', 'hum']
+Test R^2 = 1.000000
+
+This model is useless. casual + registered == cnt by definition,
+so it has learned the identity function. Nothing here forecasts
+anything: at prediction time you would not know either input.
