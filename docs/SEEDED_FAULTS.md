@@ -382,3 +382,79 @@ python -m pytest tests/ -q
 stderr:
 (empty)
 ```
+
+## Fault 3: remove the weather encoder exception
+
+Remove the unknown-label raise. The added STORM-label test must fail, so the hook can detect this change even though all current CSV weather labels are known. Restore in one controlled action.
+
+```text
+Fault: weather
+Harness: direct JSON hook invocation; not a Claude Code session.
+
+Exact seeded diff:
+--- src/features.py
++++ src/features.py
+@@ -27,7 +27,7 @@
+     known = series.dropna()
+     unknown = set(known.unique()) - set(WEATHER_ORDER)
+     if unknown:
+-        raise ValueError(f"unmapped weather labels: {sorted(unknown)}")
++        pass  # seeded fault: silently accept unknown weather
+     return series.map(WEATHER_ORDER).astype(float)
+ 
+ 
+
+
+$ PostToolUse check_leakage.sh < payload.json
+exit=2
+stdout:
+(empty)
+stderr:
+Leakage tests failed after editing /var/folders/wv/4rdwzt8n1_s6lh7md0cr5msm0000gn/T/bikeshare-weather-d2a413lm/repo/src/features.py:
+........F.                                                               [100%]
+=================================== FAILURES ===================================
+_____________________ test_weather_rejects_unknown_labels ______________________
+
+    def test_weather_rejects_unknown_labels():
+>       with pytest.raises(ValueError, match="unmapped weather labels.*STORM"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_leakage.py:81: Failed
+=========================== short test summary info ============================
+FAILED tests/test_leakage.py::test_weather_rejects_unknown_labels - Failed: D...
+1 failed, 9 passed in 1.05s
+
+
+$ python -m pytest tests/test_leakage.py -q
+exit=1
+stdout:
+........F.                                                               [100%]
+=================================== FAILURES ===================================
+_____________________ test_weather_rejects_unknown_labels ______________________
+
+    def test_weather_rejects_unknown_labels():
+>       with pytest.raises(ValueError, match="unmapped weather labels.*STORM"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_leakage.py:81: Failed
+=========================== short test summary info ============================
+FAILED tests/test_leakage.py::test_weather_rejects_unknown_labels - Failed: D...
+1 failed, 9 passed in 0.49s
+
+stderr:
+(empty)
+
+Repair attempts: 1 (restore the exact pre-fault bytes).
+
+$ make test (after restoration)
+exit=0
+stdout:
+python -m pytest tests/ -q
+.........................                                                [100%]
+25 passed in 2.93s
+
+stderr:
+(empty)
+```
