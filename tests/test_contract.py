@@ -43,6 +43,17 @@ def test_only_expected_rows_are_dropped(raw, feats):
     assert lost <= allowed_loss, f"lost {lost} rows; expected at most {allowed_loss}"
 
 
+def test_exact_retained_dates_have_complete_calendar_history(raw, feats):
+    """A row shift across the missing day must not pass the row-loss upper bound."""
+    observed = set(raw.dteday)
+    expected = {
+        day for day in observed
+        if all(day - pd.Timedelta(days=k) in observed
+               for k in range(1, LAG_WARMUP + 1))
+    }
+    assert set(feats.dteday) == expected
+
+
 def test_beats_the_mean_baseline(feats):
     """A model that cannot beat predicting the training mean is not a result."""
     cols = feature_columns(feats)

@@ -28,10 +28,11 @@ fi
 # so a broken install fails here and not twenty minutes into Step 2.
 resp=$(curl -fsS "$HOST/v1/messages" \
   -H "content-type: application/json" -H "x-api-key: ollama" -H "anthropic-version: 2023-06-01" \
-  -d "{\"model\":\"$MODEL\",\"max_tokens\":64,\"tools\":[{\"name\":\"ping\",\"description\":\"reply tool\",\"input_schema\":{\"type\":\"object\",\"properties\":{}}}],\"messages\":[{\"role\":\"user\",\"content\":\"Call the ping tool.\"}]}" 2>&1)
+  -d "{\"model\":\"$MODEL\",\"max_tokens\":256,\"thinking\":{\"type\":\"disabled\"},\"tools\":[{\"name\":\"ping\",\"description\":\"reply tool\",\"input_schema\":{\"type\":\"object\",\"properties\":{}}}],\"messages\":[{\"role\":\"user\",\"content\":\"Call the ping tool.\"}]}" 2>&1)
 if ! printf '%s' "$resp" | grep -q '"tool_use"'; then
-  echo "WARN: the model answered but did not call the tool. Agentic steps may be unreliable." >&2
+  echo "FAIL: the model did not complete a tool call." >&2
   echo "      raw: $(printf '%s' "$resp" | head -c 300)" >&2
+  exit 1
 fi
 
 echo "OK model: $MODEL at $HOST, num_ctx=$ctx, tool call works."
