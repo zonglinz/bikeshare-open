@@ -1,0 +1,2 @@
+bash model/check.sh
+OK model: bikeshare-coder at http://localhost:11434, num_ctx=65536, tool call works.

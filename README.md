@@ -93,3 +93,58 @@ skill the lesson builds in Steps 7-8. `model/` holds the Modelfile and the
 readiness check. `agent/audit.py` is the Agent SDK batch auditor from Part 4;
 it uses the same local endpoint (`AUDIT_MODEL` overrides the model). Record
 methodological decisions in `docs/DECISIONS.md`.
+
+## Assignment additions
+
+`REPORT.md` contains the required five sections and the eight-row table.
+The three-day mean candidate is implemented and tested, but excluded from
+selected inputs after negative validation deltas. `reports/metrics.json`
+contains `before_feature` and `after_feature`; its top-level models select
+`before_feature`. The target-change experiment is reported in separate
+JSON files, preserving untransformed headline metrics.
+
+The custom `/seed-fault <forbidden|rolling|weather|raw-bash>` skill and
+`python tools/seed_fault.py <name>` capture actual tests and hook stderr in
+disposable copies. `docs/SEEDED_FAULTS.md` contains the transcripts.
+`make data` checks the immutable raw hash, including changes made by Bash.
+`make test` uses validation for routine model-quality assertions.
+
+Run the batch auditor after `make all`:
+
+    python agent/audit.py . --out reports/audit.jsonl
+
+It uses the local model configured in `.claude/settings.json`; read-only
+model tools are supplemented by deterministic identity and fresh-copy
+pipeline checks. A failed model reply produces an explicit error row;
+one repository failure does not discard the batch. Full model/tool output
+is saved in `reports/audit-transcript.jsonl`.
+
+Exercise 3's teammate audit remains pending until a teammate repository is
+provided. See `docs/AUDIT.md`. Review the proposed decisions and attribution
+before publishing the repository and submitting its URL through the course
+form. A local repository or ZIP has not been submitted to the course.
+
+### Recorded local audit runtime
+
+The recorded review uses `qwen3.5:0.8b-q8_0` (752.39M text parameters),
+64k context, temperature 0, CPU inference, Ollama 0.40.18, and the CLI
+bundled with the pinned SDK. The original default model recipe remains
+available; `model/Modelfile.audit` records this smaller review build.
+The author's Codex model and this local reviewer are distinct.
+
+To repeat that local review setup, run a CPU server in one terminal:
+
+    LLAMA_ARG_DEVICE=none LLAMA_ARG_N_GPU_LAYERS=0 LLAMA_ARG_MMPROJ_OFFLOAD=0 MTMD_BACKEND_DEVICE=none ollama serve
+
+Then, in the activated project environment:
+
+    ollama pull qwen3.5:0.8b-q8_0
+    ollama create bikeshare-coder -f model/Modelfile.audit
+    make check-model
+    python agent/audit.py . --out reports/audit.jsonl
+
+CPU mode avoids the Metal command-queue failure observed inside the Codex
+sandbox. Original failed readiness logs and the corrected successful run
+are retained under `reports/model-*.txt`; `reports/model-info.json` records
+the actual source weights and runtime. The pipeline itself runs offline
+with `make all` and does not require the agent model.

@@ -1,0 +1,3 @@
+bash model/check.sh
+WARN: 'bikeshare-coder' does not advertise tool support; Claude Code needs it.
+OK model: bikeshare-coder at http://localhost:11434, num_ctx=65536, tool call works.

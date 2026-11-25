@@ -12,15 +12,15 @@ fi
 if ! curl -fsS "$HOST/api/tags" >/dev/null 2>&1; then
   echo "FAIL: no Ollama server at $HOST. Start it with: ollama serve" >&2; exit 1
 fi
-if ! ollama show "$MODEL" >/dev/null 2>&1; then
+if ! model_info=$(ollama show "$MODEL" 2>/dev/null); then
   echo "FAIL: model '$MODEL' not built. Run: make model" >&2; exit 1
 fi
 
-ctx=$(ollama show "$MODEL" 2>/dev/null | awk '/num_ctx/ {print $2}' | head -1)
+ctx=$(awk '/num_ctx/ {print $2; exit}' <<< "$model_info")
 if [ -z "$ctx" ] || [ "$ctx" -lt 65536 ]; then
   echo "FAIL: '$MODEL' has num_ctx=${ctx:-unset}; need >= 65536. Rebuild with: make model" >&2; exit 1
 fi
-if ! ollama show "$MODEL" 2>/dev/null | grep -qi "tools"; then
+if ! grep -qi "tools" <<< "$model_info"; then
   echo "WARN: '$MODEL' does not advertise tool support; Claude Code needs it." >&2
 fi
 
@@ -28,8 +28,8 @@ fi
 # so a broken install fails here and not twenty minutes into Step 2.
 resp=$(curl -fsS "$HOST/v1/messages" \
   -H "content-type: application/json" -H "x-api-key: ollama" -H "anthropic-version: 2023-06-01" \
-  -d "{\"model\":\"$MODEL\",\"max_tokens\":256,\"thinking\":{\"type\":\"disabled\"},\"tools\":[{\"name\":\"ping\",\"description\":\"reply tool\",\"input_schema\":{\"type\":\"object\",\"properties\":{}}}],\"messages\":[{\"role\":\"user\",\"content\":\"Call the ping tool.\"}]}" 2>&1)
-if ! printf '%s' "$resp" | grep -q '"tool_use"'; then
+  -d "{\"model\":\"$MODEL\",\"max_tokens\":256,\"thinking\":{\"type\":\"disabled\"},\"tools\":[{\"name\":\"ping\",\"description\":\"Reply by calling this tool.\",\"input_schema\":{\"type\":\"object\",\"properties\":{}}}],\"messages\":[{\"role\":\"user\",\"content\":\"Call the ping tool.\"}]}" 2>&1)
+if ! python3 -c 'import json,sys; d=json.load(sys.stdin); sys.exit(0 if any(b.get("type")=="tool_use" and b.get("name")=="ping" for b in d.get("content",[])) else 1)' <<< "$resp"; then
   echo "FAIL: the model did not complete a tool call." >&2
   echo "      raw: $(printf '%s' "$resp" | head -c 300)" >&2
   exit 1

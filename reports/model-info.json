@@ -1,0 +1,34 @@
+{
+  "authoring_agent": "Codex (GPT-6 family; size not exposed)",
+  "review_model_alias": "bikeshare-coder",
+  "review_model_source": "qwen3.5:0.8b-q8_0",
+  "details": {
+    "parent_model": "qwen3.5:0.8b-q8_0",
+    "format": "gguf",
+    "family": "qwen35",
+    "families": [
+      "qwen35"
+    ],
+    "parameter_size": "752.39M",
+    "quantization_level": "Q8_0",
+    "runner": "llamacpp"
+  },
+  "parameters": "num_ctx                        65536\nnum_gpu                        0\npresence_penalty               1.5\ntemperature                    0\ntop_k                          20\ntop_p                          0.95",
+  "capabilities": [
+    "completion",
+    "vision",
+    "tools",
+    "thinking"
+  ],
+  "ollama_version": "0.40.18",
+  "claude_code_version": "2.1.308",
+  "claude_agent_sdk_version": "0.2.172",
+  "runtime": "CPU",
+  "server_environment": {
+    "LLAMA_ARG_DEVICE": "none",
+    "LLAMA_ARG_N_GPU_LAYERS": "0",
+    "LLAMA_ARG_MMPROJ_OFFLOAD": "0",
+    "MTMD_BACKEND_DEVICE": "none"
+  },
+  "model_weights_sha256": "889ea3b9143cdc32146c7d530ce5f3d452ec18069086f6f4167ce9ae72a9691f"
+}

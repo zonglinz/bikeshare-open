@@ -1,0 +1,5 @@
+# The actual local SDK-review model used for this submission.
+FROM qwen3.5:0.8b-q8_0
+PARAMETER num_ctx 65536
+PARAMETER num_gpu 0
+PARAMETER temperature 0
