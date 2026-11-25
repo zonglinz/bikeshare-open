@@ -64,3 +64,11 @@ def test_no_missing_values(feats):
 def test_dates_are_sorted_and_unique(feats):
     assert feats.dteday.is_monotonic_increasing
     assert feats.dteday.is_unique
+
+
+def test_three_day_mean_uses_only_prior_calendar_dates(feats):
+    """June 15 uses June 12-14: 4,972, 7,421, and 7,363 rides."""
+    date = pd.Timestamp("2012-06-15")
+    expected = (4972 + 7421 + 7363) / 3
+    actual = feats.set_index("dteday").loc[date, "cnt_roll_3"]
+    assert actual == pytest.approx(expected)
