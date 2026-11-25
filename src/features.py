@@ -3,7 +3,7 @@
 The contract this module guarantees, and that tests/ enforces:
   1. No column in FORBIDDEN (see src/config.py) reaches the model.
   2. Every feature at time t is computable from information available at t.
-  3. The output is sorted by date, gap-free after dropna, and complete.
+  3. Lags are built on a gap-free calendar; incomplete rows are then removed.
 
 Run: python -m src.features
 """
@@ -65,7 +65,8 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     out["month_sin"] = np.sin(2 * np.pi * month / 12)
     out["month_cos"] = np.cos(2 * np.pi * month / 12)
 
-    # --- Weather: measured same-day, available to a forecaster ----------
+    # Same-day weather is a conditional input. Deployment requires forecasts
+    # issued before the day; realized daily weather is not known in advance.
     out["weather_severity"] = encode_weather(out.weather)
 
     # --- Lagged target: past values only. shift(1) is the whole ballgame;
@@ -74,6 +75,7 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     out["cnt_lag_1"] = out[TARGET].shift(1)
     out["cnt_lag_7"] = out[TARGET].shift(LAG_WARMUP)
     out["cnt_roll_7"] = out[TARGET].shift(1).rolling(LAG_WARMUP).mean()
+    out["cnt_roll_3"] = out[TARGET].shift(1).rolling(3).mean()
 
     return out.dropna().reset_index(drop=True)
 

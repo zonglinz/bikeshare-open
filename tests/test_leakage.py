@@ -4,11 +4,14 @@ test_no_forbidden_features is the single most valuable test in this repo:
 casual + registered == cnt exactly, so any model handed those columns
 scores R^2 = 1.0 and looks brilliant while having learned nothing.
 """
+from itertools import combinations
+
+import numpy as np
 import pandas as pd
 import pytest
 
 from src.config import FORBIDDEN, TARGET
-from src.features import build_features, feature_columns
+from src.features import build_features, encode_weather, feature_columns
 from src.ingest import load_raw
 
 
@@ -72,3 +75,20 @@ def test_three_day_mean_uses_only_prior_calendar_dates(feats):
     expected = (4972 + 7421 + 7363) / 3
     actual = feats.set_index("dteday").loc[date, "cnt_roll_3"]
     assert actual == pytest.approx(expected)
+
+
+def test_weather_rejects_unknown_labels():
+    with pytest.raises(ValueError, match="unmapped weather labels.*STORM"):
+        encode_weather(pd.Series(["GOOD", "STORM"]))
+
+
+def test_no_single_feature_or_pair_exactly_restates_target(feats):
+    """Inspect values, so renaming a leaked predictor does not defeat the check."""
+    cols = feature_columns(feats)
+    y = feats[TARGET].to_numpy(dtype=float)
+    for size in (1, 2):
+        for subset in combinations(cols, size):
+            X = np.column_stack([feats[list(subset)].to_numpy(dtype=float), np.ones(len(y))])
+            coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+            residual = float(np.max(np.abs(X @ coef - y)))
+            assert residual > 1e-6, f"target identity in {subset}: max residual={residual}"
