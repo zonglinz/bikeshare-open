@@ -10,6 +10,10 @@ needed. Nothing leaves your laptop.
 
 ## Setup
 
+Use Python 3.13 (3.12+ is required by the starter's NumPy 2.5.3 pin).
+The original Python 3.11 setup cannot install those pins.
+
+
     # 1. Ollama (the local model server)   https://ollama.com/download
     ollama serve                           # leave running in its own terminal
 
@@ -17,12 +21,12 @@ needed. Nothing leaves your laptop.
     curl -fsSL https://claude.ai/install.sh | bash
 
     # 3. This repo
-    python3 -m venv .venv && source .venv/bin/activate
+    python3.13 -m venv .venv && source .venv/bin/activate
     pip install -r requirements.txt
     make model          # pulls the base model, builds `bikeshare-coder` with a 64k context
     make check-model    # confirms Claude Code can reach it and that tool calls work
     make all            # data -> features -> train, writes reports/metrics.json
-    make test           # 14 tests
+    make test           # includes feature, schema and integrity guards
 
     # 4. Start the agent, from the repo root
     claude

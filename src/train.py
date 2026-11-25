@@ -18,7 +18,7 @@ Run: python -m src.train
 import json
 
 import pandas as pd
-from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.base import BaseEstimator, RegressorMixin, clone
 from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.linear_model import Ridge
@@ -26,7 +26,7 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from src.config import METRICS, PROCESSED, TARGET, TRAIN_END, VALID_END
+from src.config import METRICS, PROCESSED, ROOT, TARGET, TRAIN_END, VALID_END
 from src.features import feature_columns
 
 
@@ -62,9 +62,7 @@ def temporal_split(df: pd.DataFrame):
     return train, valid, test
 
 
-def fit_and_score() -> dict:
-    df = pd.read_parquet(PROCESSED)
-    cols = feature_columns(df)
+def score_variant(df: pd.DataFrame, cols: list[str]) -> dict:
     train, valid, test = temporal_split(df)
 
     results = {
@@ -74,7 +72,8 @@ def fit_and_score() -> dict:
         "n_valid": len(valid),
         "n_test": len(test),
     }
-    for name, model in MODELS.items():
+    for name, estimator in MODELS.items():
+        model = clone(estimator)
         model.fit(train[cols], train[TARGET])
         results[name] = {
             split: {
@@ -86,8 +85,51 @@ def fit_and_score() -> dict:
     return results
 
 
+def fit_and_score() -> dict:
+    df = pd.read_parquet(PROCESSED)
+    before_cols = [c for c in feature_columns(df, include_rejected=True) if c != "cnt_roll_3"]
+    after_cols = feature_columns(df, include_rejected=True)
+    before = score_variant(df, before_cols)
+    after = score_variant(df, after_cols)
+    return {
+        **before,
+        "selected_variant": "before_feature",
+        "feature_decision": "Reject cnt_roll_3 based only on validation; keep its tested implementation for inspection.",
+        "before_feature": before,
+        "after_feature": after,
+    }
+
+
+def write_final_diagnostics(df: pd.DataFrame) -> None:
+    """Evidence inspected only after the feature and transformation were frozen."""
+    from src.target_transform import evaluate
+
+    cols = feature_columns(df)
+    train, valid, test = temporal_split(df)
+    ridge = clone(MODELS["ridge"]).fit(train[cols], train[TARGET])
+    booster = clone(MODELS["hgb"]).fit(train[cols], train[TARGET])
+    diagnostics = {
+        "splits": {
+            name: {"n": len(part), "min": int(part[TARGET].min()),
+                   "max": int(part[TARGET].max()), "mean": float(part[TARGET].mean())}
+            for name, part in [("train", train), ("valid", valid), ("test", test)]
+        },
+        "test_fraction_above_training_max": float((test[TARGET] > train[TARGET].max()).mean()),
+        "hgb_test_prediction_range": [float(booster.predict(test[cols]).min()),
+                                      float(booster.predict(test[cols]).max())],
+        "ridge_standardized_coefficients": dict(zip(cols, ridge[-1].coef_.tolist())),
+        "weather_availability": "Conditional evaluation uses realized same-day weather; day-ahead deployment requires issued forecasts.",
+    }
+    (ROOT / "reports/diagnostics.json").write_text(json.dumps(diagnostics, indent=2) + "\n")
+    (ROOT / "reports/target_transform_final.json").write_text(
+        json.dumps(evaluate(df, cols, include_test=True), indent=2) + "\n"
+    )
+
+
 if __name__ == "__main__":
     res = fit_and_score()
     METRICS.parent.mkdir(parents=True, exist_ok=True)
-    METRICS.write_text(json.dumps(res, indent=2))
-    print(json.dumps({k: v for k, v in res.items() if k != "features"}, indent=2))
+    METRICS.write_text(json.dumps(res, indent=2) + "\n")
+    write_final_diagnostics(pd.read_parquet(PROCESSED))
+    print(json.dumps({k: v for k, v in res.items()
+                      if k not in {"features", "before_feature", "after_feature"}}, indent=2))

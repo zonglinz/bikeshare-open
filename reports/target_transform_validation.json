@@ -1,0 +1,51 @@
+{
+  "transformation": "delta_cnt = cnt - cnt_lag_1; inverse = cnt_lag_1 + predicted_delta",
+  "selection_split": "valid",
+  "test_evaluated": false,
+  "features": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed",
+    "dayofweek",
+    "is_weekend",
+    "is_holiday",
+    "is_workday",
+    "month_sin",
+    "month_cos",
+    "weather_severity",
+    "cnt_lag_1",
+    "cnt_lag_7",
+    "cnt_roll_7"
+  ],
+  "baseline_mean": {
+    "valid": {
+      "r2": -0.9318,
+      "mae": 2002.2
+    }
+  },
+  "baseline_persistence": {
+    "valid": {
+      "r2": 0.4507,
+      "mae": 900.6
+    }
+  },
+  "ridge": {
+    "valid": {
+      "r2": 0.6475,
+      "mae": 832.9
+    }
+  },
+  "hgb": {
+    "valid": {
+      "r2": 0.2185,
+      "mae": 1296.6
+    }
+  },
+  "hgb_delta": {
+    "valid": {
+      "r2": 0.6079,
+      "mae": 834.3
+    }
+  }
+}

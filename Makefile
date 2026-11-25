@@ -1,19 +1,24 @@
 .PHONY: all data features train test clean model check-model
+.NOTPARALLEL: all
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python)
+export OMP_NUM_THREADS = 1
+export OPENBLAS_NUM_THREADS = 1
+export LOKY_MAX_CPU_COUNT = 1
 
 # --- The pipeline ----------------------------------------------------------
 all: data features train
 
 data:
-	python -m src.ingest
+	$(PYTHON) -m src.ingest
 
 features:
-	python -m src.features
+	$(PYTHON) -m src.features
 
 train:
-	python -m src.train
+	$(PYTHON) -m src.train
 
 test:
-	python -m pytest tests/ -q
+	$(PYTHON) -m pytest tests/ -q
 
 clean:
 	rm -f data/processed/*.parquet reports/metrics.json reports/*.png

@@ -9,8 +9,11 @@
 # stop_hook_active in the payload to avoid looping).
 set -uo pipefail
 
+cd "${CLAUDE_PROJECT_DIR:-.}" || exit 2
+python_cmd="python"
+if [ -x .venv/bin/python ]; then python_cmd=".venv/bin/python"; fi
 payload=$(cat)
-path=$(printf '%s' "$payload" | python3 -c \
+path=$(printf '%s' "$payload" | "$python_cmd" -c \
   'import json,sys; print(json.load(sys.stdin).get("tool_input",{}).get("file_path",""))')
 
 case "$path" in
@@ -18,8 +21,7 @@ case "$path" in
   *) exit 0 ;;
 esac
 
-cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
-if ! out=$(python -m pytest tests/test_leakage.py -q 2>&1); then
+if ! out=$("$python_cmd" -m pytest tests/test_leakage.py -q 2>&1); then
   echo "Leakage tests failed after editing $path:" >&2
   echo "$out" | tail -20 >&2
   exit 2

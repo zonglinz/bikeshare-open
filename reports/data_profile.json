@@ -1,0 +1,136 @@
+{
+  "n_rows": 728,
+  "date_min": "2011-01-03",
+  "date_max": "2012-12-31",
+  "missing_dates": [
+    "2011-03-10"
+  ],
+  "columns": {
+    "instant": {
+      "dtype": "int64",
+      "nulls": 0
+    },
+    "dteday": {
+      "dtype": "datetime64[us]",
+      "nulls": 0
+    },
+    "season": {
+      "dtype": "str",
+      "nulls": 0,
+      "values": {
+        "SUMMER": 188,
+        "SPRING": 184,
+        "WINTER": 178,
+        "FALL": 178
+      }
+    },
+    "yr": {
+      "dtype": "int64",
+      "nulls": 0,
+      "values": {
+        "2012": 366,
+        "2011": 362
+      }
+    },
+    "mnth": {
+      "dtype": "str",
+      "nulls": 0,
+      "values": {
+        "MAY": 62,
+        "JUL": 62,
+        "AUG": 62,
+        "OCT": 62,
+        "DEC": 62,
+        "MAR": 61,
+        "JAN": 60,
+        "APR": 60,
+        "JUN": 60,
+        "SEP": 60,
+        "NOV": 60,
+        "FEB": 57
+      }
+    },
+    "holiday": {
+      "dtype": "str",
+      "nulls": 0,
+      "values": {
+        "N": 707,
+        "Y": 21
+      }
+    },
+    "weekday": {
+      "dtype": "str",
+      "nulls": 0,
+      "values": {
+        "MON": 105,
+        "TUE": 104,
+        "WED": 104,
+        "FRI": 104,
+        "SAT": 104,
+        "SUN": 104,
+        "THU": 103
+      }
+    },
+    "temp": {
+      "dtype": "float64",
+      "nulls": 0
+    },
+    "atemp": {
+      "dtype": "float64",
+      "nulls": 0
+    },
+    "hum": {
+      "dtype": "float64",
+      "nulls": 0
+    },
+    "windspeed": {
+      "dtype": "float64",
+      "nulls": 0
+    },
+    "casual": {
+      "dtype": "int64",
+      "nulls": 0
+    },
+    "registered": {
+      "dtype": "int64",
+      "nulls": 0
+    },
+    "cnt": {
+      "dtype": "int64",
+      "nulls": 0
+    },
+    "workday": {
+      "dtype": "str",
+      "nulls": 0,
+      "values": {
+        "Y": 499,
+        "N": 229
+      }
+    },
+    "weather": {
+      "dtype": "str",
+      "nulls": 0,
+      "values": {
+        "GOOD": 463,
+        "MISTY": 245,
+        "BAD": 20
+      }
+    },
+    "days_since_2011": {
+      "dtype": "int64",
+      "nulls": 0
+    },
+    "cnt_2d_bfr": {
+      "dtype": "int64",
+      "nulls": 0
+    }
+  },
+  "target_identity": {
+    "coefficients_with_intercept": [
+      0.9999999999999977,
+      1.0000000000000007,
+      -3.3616964706279245e-14
+    ],
+    "maximum_absolute_residual": 5.4569682106375694e-12
+  }
+}

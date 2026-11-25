@@ -21,6 +21,14 @@ DATA_URL = (
 )
 
 TARGET = "cnt"
+RAW_SHA256 = "a6bed1577f6e4de56dcfae6d8315985073cc0ad3446c8c99ed60c86a0b5ad9dc"
+
+# Explicitly classify inputs, including categories consumed by encoders.
+# An unfamiliar raw column requires a methodological decision before use.
+RAW_FEATURE_INPUTS = {
+    "temp", "atemp", "hum", "windspeed", "season", "mnth", "holiday",
+    "weekday", "workday", "weather",
+}
 
 # --- Three reasons a column is kept out of the feature set --------------
 
@@ -44,6 +52,10 @@ UNVERIFIED_COLS = {"cnt_2d_bfr"}
 
 # What feature_columns() and the tests actually enforce.
 FORBIDDEN = LEAKAGE_COLS | TIME_INDEX_COLS | UNVERIFIED_COLS
+
+# Validation R² fell for both models; compute the experiment for inspection
+# but exclude it from the selected pipeline. Never choose this using test.
+REJECTED_FEATURES = {"cnt_roll_3"}
 
 # Temporal split: train on 2011, validate on H1 2012, test on H2 2012.
 TRAIN_END = "2011-12-31"

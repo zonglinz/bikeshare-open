@@ -10,7 +10,7 @@ Run: python -m src.features
 import numpy as np
 import pandas as pd
 
-from src.config import FORBIDDEN, LAG_WARMUP, PROCESSED, TARGET
+from src.config import FORBIDDEN, LAG_WARMUP, PROCESSED, REJECTED_FEATURES, TARGET
 from src.ingest import load_raw
 
 WEATHER_ORDER = {"GOOD": 0, "MISTY": 1, "BAD": 2}
@@ -80,9 +80,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     return out.dropna().reset_index(drop=True)
 
 
-def feature_columns(df: pd.DataFrame) -> list[str]:
-    """Numeric columns that are safe to feed the model."""
-    numeric = df.select_dtypes(include="number").columns
+def feature_columns(df: pd.DataFrame, include_rejected: bool = False) -> list[str]:
+    """Safe model inputs; rejected candidates can be evaluated explicitly."""
+    numeric = [c for c in df.select_dtypes(include="number").columns
+               if include_rejected or c not in REJECTED_FEATURES]
     return [c for c in numeric if c not in FORBIDDEN]
 
 
