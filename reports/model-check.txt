@@ -1,5 +1,0 @@
-bash model/check.sh
-WARN: 'bikeshare-coder' does not advertise tool support; Claude Code needs it.
-FAIL: the model did not complete a tool call.
-      raw: curl: (22) The requested URL returned error: 500
-make: *** [check-model] Error 1

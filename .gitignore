@@ -4,3 +4,4 @@ __pycache__/
 data/processed/
 .claude/settings.local.json
 .claude/runtime/
+.DS_Store

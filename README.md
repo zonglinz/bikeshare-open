@@ -146,7 +146,8 @@ Then, in the activated project environment:
     python agent/audit.py . --out reports/audit.jsonl
 
 CPU mode avoids the Metal command-queue failure observed inside the Codex
-sandbox. Original failed readiness logs and the corrected successful run
-are retained under `reports/model-*.txt`; `reports/model-info.json` records
-the actual source weights and runtime. The pipeline itself runs offline
+sandbox. `reports/model-check-final.txt` records a successful tool-call
+readiness check; `reports/model-info.json` records the source weights and
+runtime. Redundant setup/retry logs were removed from the submission tree;
+their earlier versions remain in Git history. The pipeline runs offline
 with `make all` and does not require the agent model.

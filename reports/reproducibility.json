@@ -17,5 +17,55 @@
       "verdict": "clean",
       "identities": []
     }
+  },
+  "final_submission_check": {
+    "required_files_present": true,
+    "all_starter_files_preserved": true,
+    "first_commit_matches_original_starter": true,
+    "report_sections": 5,
+    "report_metric_rows": 8,
+    "report_metric_values_match": true,
+    "claude_md_lines": 36,
+    "clean_copy_make_all_exit": 0,
+    "clean_copy_make_test_exit": 0,
+    "test_summary": "28 passed in 1.36s",
+    "metrics_identical_bytes": true,
+    "configured_hook_in_path_with_spaces": {
+      "passing_source_exit": 0,
+      "non_source_exit": 0,
+      "broken_source_exit": 2
+    },
+    "seeded_faults_detected_and_restored": [
+      "forbidden",
+      "rolling",
+      "weather",
+      "raw-bash"
+    ],
+    "test_first_history": {
+      "f9f8de3": "intended KeyError for missing cnt_roll_3",
+      "ee152a7": "same named-date test passes"
+    },
+    "raw_sha256": "a6bed1577f6e4de56dcfae6d8315985073cc0ad3446c8c99ed60c86a0b5ad9dc",
+    "verified_source_sha256": {
+      ".claude/settings.json": "f1ccf7216f27f7a9e15e6b9754f2c79bf1958c9ac5c232f3bd24b85764d53dad",
+      ".claude/hooks/check_leakage.sh": "8529d0e1f2e74b5ffaed0d524377c53fc4889a695f2d1754525be7569b8ed298",
+      "Makefile": "fb379de733360a3c7c2da825cc012157f54d72d26f90f8f9ba148d44956c289d",
+      "requirements.txt": "14fb52d06e5f1027332fa768879ddb0b37490a5a4082bba6f8321ca3ef644524",
+      "requirements-lock.txt": "6d39da056c941ad4aabeafb4a895136946de0d60254cee0517aeefe4dba6a7b6",
+      "src/config.py": "1d6632e6fbb6b415450bf8124844c05325217bea2cfc339f22f14f99b36ab768",
+      "src/ingest.py": "bf3a664608d27fbfdb5943975cbe56cd697f2f643c3d47347973fac2ee6d44b6",
+      "src/features.py": "ee1a7d91fc1d94bff65dc9468a88cdbc6997fab45e09873d4a36a3b998f57a5d",
+      "src/train.py": "6b10e009e776482a59cb90beb03e19bd6873e8264f5cfd967208befcb1d2b9f9",
+      "tests/test_leakage.py": "bbff6e3bfcdd179b2fa1b9ab6ab45d0b514b47d3afcc2e740daef15f935208ca",
+      "tests/test_contract.py": "02ade5bf4258de1a9643840efe7ee709bed2763caccf505042af1001ef1ed11e",
+      "tests/test_split.py": "f6aa5e61d400d6f1dae7808829d89c28e181abd34260e354c0193995f0f4d1d3",
+      "tests/test_audit.py": "d300541ec4262cc2bc8058172b65bd3221084986e57e13bc642086d7c5c08a51"
+    },
+    "cleanup": {
+      "redundant_tracked_logs_removed": 14,
+      "duplicate_local_copies_moved_to_recoverable_backup": 2,
+      "git_history_preserved": true
+    },
+    "remaining_student_action": "Review the report and attribution, then submit the public repository URL in the course form."
   }
 }
