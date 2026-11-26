@@ -122,9 +122,18 @@ is saved in `reports/audit-transcript.jsonl`.
 Exercise 3's teammate audit is complete for AhmadAgeel/bikeshare-open at
 commit a2192434d64add5b5cb2c7b4008e4ae58c66a3b5. See `docs/AUDIT.md` and
 `reports/peer-review/` for the real reviewer output, checks and assessment.
-The public repository is https://github.com/zonglinz/bikeshare-open.
-Review the proposed decisions and attribution, then submit that URL through
-the course form. No course submission has been sent by the agent.
+This copy uses branch `main`, with `zonglinz` as author and committer for
+the preserved assignment history. `reports/history-map.json` maps commit
+hashes quoted in the original audit records to identical trees here.
+The original repository at https://github.com/zonglinz/bikeshare-open remains
+a backup. Publish this copy to the new repository, review the decisions
+and attribution, then submit the new URL through the course form.
+No course submission has been sent by the agent.
+
+Actual Claude Edit/PostToolUse fault sessions supplement the scripted
+fault checks. Their observed repair counts, hook output and source hashes
+are recorded in `reports/faults/agent-hook-verification.jsonl` and explained
+in `docs/SEEDED_FAULTS.md`.
 
 ### Recorded local audit runtime
 

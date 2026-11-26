@@ -1,6 +1,6 @@
 # Seeded faults and real verification output
 
-The authoring agent was Codex. Hook experiments below invoke the real script with a JSON payload directly; they do not claim an interactive Claude Code hook event. Deliberate mutations use isolated copies, preserving the submission CSV. Repair attempts mean explicit restoration attempts, not local-model conversation turns.
+The authoring agent was Codex. The original experiments below invoke the real hook script directly with a JSON payload; their restoration counts are scripted actions, not local-model conversation turns. The final section separately records native Claude Code Edit/PostToolUse events and measured assistant turns. All deliberate mutations use isolated copies, preserving the submission CSV.
 
 ## Feature test written first
 
@@ -605,3 +605,22 @@ tests/test_contract.py:54: AssertionError
 FAILED tests/test_contract.py::test_exact_retained_dates_have_complete_calendar_history
 1 failed in 2.72s
 ```
+
+
+## Observed Claude Code Edit/PostToolUse verification
+
+A fresh local Claude Code process for each source fault used `qwen3.5:0.8b-q8_0` through the `bikeshare-coder` alias (64k context, temperature 0). Each process had Read/Edit tools only, edited a disposable copy, received the actual failing `PostToolUse:Edit` hook feedback, and restored the original source in a later assistant turn. A logging wrapper called the unchanged `.claude/hooks/check_leakage.sh` and returned its real exit code and stderr. This supplements the earlier direct-invocation experiments; it does not replace their evidence or turn counts.
+
+| Fault | Whole workflow CLI turns | Assistant repair turns after failed hook | Seed hook exit | Restored hook exit |
+| --- | ---: | ---: | ---: | ---: |
+| Forbidden-column filter bypass | 5 | 1 | 2 | 0 |
+| Unshifted seven-day rolling mean | 5 | 2 | 2 | 0 |
+| Removed unknown-weather raise | 4 | 1 | 2 | 0 |
+
+Whole workflow turns are the CLI's `num_turns`, including reads, seeding, restoration and final response. Repair turns count distinct assistant messages after the seeding message through the successful restoring Edit; they exclude the seeding message. These are observed counts for a prompted seed-and-restore exercise, not evidence of unprompted fault discovery.
+
+The native forbidden edit changed `return [c for c in numeric if c not in FORBIDDEN]` to `return list(numeric)`; its hook reported two failed leakage tests. The rolling edit removed `.shift(1)` before `.rolling(LAG_WARMUP).mean()`; its hook reported one failed prior-calendar rolling test. The weather edit replaced the unknown-label `raise ValueError(...)` with `pass  # deliberate seeded fault`; its hook reported `DID NOT RAISE ValueError`. In each case the next Edit restored the exact original string, and the restored hook exited 0 with empty stdout/stderr.
+
+`reports/faults/agent-hook-verification.jsonl` preserves all three verified records unchanged, including exact Edit old/new strings, tool-use IDs, the failing hook stderr, source hashes, session IDs and the CLI's final prose. The seeded source SHA-256 values were `01d8b507de48a1d376b516d5da2c0e192a07125935ce0e6f07b3232d1462e552` (forbidden), `2dc2854fca10b427632943db74f71f4fb2545748b3c78769fdac258365ff781a` (rolling), and `055851df9e7039fcf3f7020ff0d69925974c68cd9fb21b402da0e2038708e9e3` (weather). All three restored copies exactly match the original `src/features.py` SHA-256: `ee1a7d91fc1d94bff65dc9468a88cdbc6997fab45e09873d4a36a3b998f57a5d`.
+
+The model's final summaries are misleading: they describe tests as still failing, mention an unrelated directory problem, or omit the restoration. Those summaries are retained verbatim rather than treated as verification. The recorded Edit events, real hook exit codes and matching source hashes establish that all three faults were restored.

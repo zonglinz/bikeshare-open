@@ -1,0 +1,86 @@
+{
+  "description": "The new repository preserves the 20 original commit trees, messages, dates and order, with author and committer set to zonglinz. Hashes quoted in older audit evidence refer to the original repository; use this map to locate the identical tree in this copy. AI-use attribution is retained in REPORT.md.",
+  "original_repository": "https://github.com/zonglinz/bikeshare-open",
+  "commits": {
+    "b9a37806bc08ef5e458968b59d6ee96b17902bd0": {
+      "new_commit": "cd2dc53c3ba0b8dc52cff1223d65ca90a605728b",
+      "tree": "9be55e03957a9a8356f80a52bf0a3734e9a37306"
+    },
+    "f9f8de3309a4fcc3c5216cb6340fdcd8991ce1e9": {
+      "new_commit": "a12cf3b9fbd7ae53b8985fa6570f14597c770f52",
+      "tree": "d7598115e4d2337293e3f9176c568793d0002d73"
+    },
+    "ee152a722de6c45383be173934a9e6dbb8dba6be": {
+      "new_commit": "ce812ed5012b985f4c7101fdbda64984e9bd76b0",
+      "tree": "acac702de9d9daaaa3fae6b3d60c128532cd0382"
+    },
+    "9b9cac091a4dcf992d4d2a9b1b67ac776e1ff748": {
+      "new_commit": "3b1d7016bb337beda846665aabddbb0b39f03d81",
+      "tree": "a586b4f0621a1b456bc663627362e0baf8a288af"
+    },
+    "22fa055b9ce6d08b944d0b34ddeac4223c2750fc": {
+      "new_commit": "2093a4bd2b3569ae161ddcb38b4bc2260658895f",
+      "tree": "ae0512f5b62aad9afc243b60cf4451a3939b7c14"
+    },
+    "33f9311ed5f213df5e38d3f220fe95cadb6800b0": {
+      "new_commit": "4c078560a54346603980de5fb919c59fdc927f3b",
+      "tree": "c48c88670796026100e96f9ea58fdab7ed12848c"
+    },
+    "a77946db989ebe114d5ba05f700df04555cb26f0": {
+      "new_commit": "b81ffcf1642a5a7c8d3bfd99226a040754e4b26a",
+      "tree": "39f5b17723bb057bc478aa9aca18ec560a53e6f2"
+    },
+    "24ed64926e5ab223d8171047eb0962d7cb97685a": {
+      "new_commit": "7fdd560452dd7990b1293bf566d99aea20f7cc1a",
+      "tree": "ba21f80eb6475fcf641570d02e8298d6e8a6f8b8"
+    },
+    "cce4e2cd20b086b0867b5aa4c77f0d8392564858": {
+      "new_commit": "05c18b4af63bbdc3d102b9642abf57930504e7e0",
+      "tree": "86476e907dfdd833849c5ff25cf4b431ce7f07f6"
+    },
+    "2e7188a2969e5ab9a93c028a8456b4d065e02285": {
+      "new_commit": "7e0511867e0b649cce816b0072b12ba114bd1dfe",
+      "tree": "a45614d7b2603098a2572a46bf4cf6f5e319f968"
+    },
+    "264bb251733752dd3b05425c383dead759e48eed": {
+      "new_commit": "fc8ef84ac362b3e905162dcdad9f59fc4adb7613",
+      "tree": "eae12f454e8d0e25d937fcc51361c01817c815fa"
+    },
+    "cda20e42fdc7a29265593c57c002654311aa2080": {
+      "new_commit": "c7478e1b6a55d1df9197d00fd0c787b3ee495310",
+      "tree": "d0af6c84f94d734ef16a9d6ca5a991342835517b"
+    },
+    "8ab9562b0569cba0c1ff188fa110b6fe51c24418": {
+      "new_commit": "d2e315bbf45f743674859ffab8739f75b7835532",
+      "tree": "1af31061c2416c58afcc6d04a19d14e9d29c13b1"
+    },
+    "e853b0adc5810ccb5dbf383d512e0b9b9317b7d5": {
+      "new_commit": "f634fbc19ed6b6df5c39cb134cd9fe1d9b405fd1",
+      "tree": "fa2d0f4b2ea54668606db7ed26a31521c3b4fca6"
+    },
+    "6a3068a5039317b81f4a19c7b3463154a0710511": {
+      "new_commit": "41b6fdbaa21282d2035018ba0385f463c00ba83a",
+      "tree": "03c286dc85296bdb4f8329ce6c01eca3f134ee32"
+    },
+    "b8c0e7c41dd212ec4d4991761e9389909ec5b318": {
+      "new_commit": "559b9ec2c3edc5be469a7fb085961180e0139db6",
+      "tree": "3a672e849fd2ae5a6dc1e6d4ad263a513120ee71"
+    },
+    "2da95096fdc38b7f13f308d2ae88e70d0b980c01": {
+      "new_commit": "e65702c173f26a8c4fccb31a017b9adf7c4f5fe4",
+      "tree": "68098d904d513a20254a0036132eb1f0962c436b"
+    },
+    "f1ef224c55e90dbffa3e6d4a804e9b84921e10b1": {
+      "new_commit": "807880fb19adc4cb9cdaa92eb5a3b7b45a767d3b",
+      "tree": "19342500531aba74d23ba410a8f78d133c6daf06"
+    },
+    "fe8f9b838314769492d4c9deb54b7a06703ce8b7": {
+      "new_commit": "7c7a6f5d607ab60cd997b39bf1f425dd9e226b2b",
+      "tree": "1ff0e47ea5499439ae2334b7f8a68dbe9be1c1ab"
+    },
+    "ef8e6f01687e8c95f5f51b616ef3fee7aab7e5a0": {
+      "new_commit": "cb395eaf7d620b6c82c308485540c1564b033c7b",
+      "tree": "0344f6992dfcf26b4e33ae1ff6b98bd83831bb8f"
+    }
+  }
+}

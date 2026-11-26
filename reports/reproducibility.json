@@ -66,6 +66,55 @@
       "duplicate_local_copies_moved_to_recoverable_backup": 2,
       "git_history_preserved": true
     },
-    "remaining_student_action": "Review the report and attribution, then submit the public repository URL in the course form."
+    "remaining_student_action": "Review the report and attribution, then submit the public repository URL in the course form.",
+    "native_hook_repair_runs": [
+      {
+        "fault": "forbidden",
+        "model": "qwen3.5:0.8b-q8_0",
+        "cli_num_turns": 5,
+        "repair_assistant_turns_after_failed_hook": 1,
+        "source_restored_exactly": true,
+        "hook_exit_codes": [
+          2,
+          0
+        ]
+      },
+      {
+        "fault": "rolling",
+        "model": "qwen3.5:0.8b-q8_0",
+        "cli_num_turns": 5,
+        "repair_assistant_turns_after_failed_hook": 2,
+        "source_restored_exactly": true,
+        "hook_exit_codes": [
+          2,
+          0
+        ]
+      },
+      {
+        "fault": "weather",
+        "model": "qwen3.5:0.8b-q8_0",
+        "cli_num_turns": 4,
+        "repair_assistant_turns_after_failed_hook": 1,
+        "source_restored_exactly": true,
+        "hook_exit_codes": [
+          2,
+          0
+        ]
+      }
+    ]
+  },
+  "history_reference_map": "reports/history-map.json",
+  "new_repository_copy_check": {
+    "all_20_original_commit_trees_preserved": true,
+    "commit_messages_dates_and_order_preserved": true,
+    "all_authors_and_committers": "zonglinz",
+    "branch": "main",
+    "clean_copy_make_all_exit": 0,
+    "clean_copy_make_test_exit": 0,
+    "test_summary": "28 passed in 1.33s",
+    "metrics_identical_bytes": true,
+    "configured_hook_with_spaces_verified": true,
+    "all_four_seeded_faults_detected_and_restored": true,
+    "original_published_repository_unchanged": true
   }
 }

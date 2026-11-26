@@ -63,3 +63,5 @@ of the conclusion: this is a conditional evaluation, and deployment needs
 weather forecasts issued before each day. This author's assessment is
 separate from the required independent peer review. The student must
 review and adopt the final research claim.
+
+History references: this copy uses `zonglinz` as Git author and committer. `reports/history-map.json` maps the original commit hashes quoted in the untouched audit evidence to identical commit trees here. The original starter and test-first sequence are preserved; the AI-use disclosure remains in `REPORT.md`.
