@@ -125,9 +125,10 @@ commit a2192434d64add5b5cb2c7b4008e4ae58c66a3b5. See `docs/AUDIT.md` and
 This copy uses branch `main`, with `zonglinz` as author and committer for
 the preserved assignment history. `reports/history-map.json` maps commit
 hashes quoted in the original audit records to identical trees here.
-The original repository at https://github.com/zonglinz/bikeshare-open remains
-a backup. Publish this copy to the new repository, review the decisions
-and attribution, then submit the new URL through the course form.
+The user recreated an empty public repository at
+https://github.com/zonglinz/bikeshare-open for this new history.
+The previous repository is retained locally as a backup. Review the decisions
+and attribution, then submit the public URL through the course form.
 No course submission has been sent by the agent.
 
 Actual Claude Edit/PostToolUse fault sessions supplement the scripted
