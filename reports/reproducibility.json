@@ -66,7 +66,7 @@
       "duplicate_local_copies_moved_to_recoverable_backup": 2,
       "git_history_preserved": true
     },
-    "remaining_student_action": "Review the report and attribution, then submit the public repository URL in the course form.",
+    "remaining_student_action": "Submit or resubmit the updated main branch in Gradescope and verify its confirmation.",
     "native_hook_repair_runs": [
       {
         "fault": "forbidden",
@@ -116,5 +116,13 @@
     "configured_hook_with_spaces_verified": true,
     "all_four_seeded_faults_detected_and_restored": true,
     "original_published_repository_unchanged": true
+  },
+  "student_decision_review": {
+    "date": "2026-11-25",
+    "status": "reviewed_and_adopted",
+    "confirmation": "I have read this and agree",
+    "scope": "The proposed review covering target-component exclusions, chronological split and both baselines, validation-based feature rejection, rolling one-day target transformation, persistence for absolute error, conditional weather, and rejection of the auditor leakage claim on recorded checks.",
+    "ai_authorship_disclosed": true,
+    "pipeline_changed": false
   }
 }
