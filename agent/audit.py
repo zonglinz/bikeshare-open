@@ -321,7 +321,7 @@ async def main() -> None:
             try:
                 return await asyncio.wait_for(audit_repo(repo), timeout=ns.timeout)
             except Exception as error:
-                return {"repo": repo.name, "error": type(error).__name__, "detail": str(error)[:500]}
+                return {"repo": repo.resolve().name, "error": type(error).__name__, "detail": str(error)[:500]}
 
     results = await asyncio.gather(*(bounded(r) for r in ns.repos))
     ns.out.parent.mkdir(parents=True, exist_ok=True)
@@ -330,7 +330,8 @@ async def main() -> None:
             fh.write(json.dumps(row) + "\n")
 
     flagged = sum(r.get("leakage") in {"suspected", "confirmed"} for r in results)
-    print(f"audited {len(results)} repos; {flagged} flagged -> {ns.out}", file=sys.stderr)
+    failed = sum("error" in row for row in results)
+    print(f"audited {len(results)} repos; {flagged} flagged; {failed} failed -> {ns.out}", file=sys.stderr)
 
 
 if __name__ == "__main__":

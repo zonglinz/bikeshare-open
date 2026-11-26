@@ -1,0 +1,1 @@
+{"repo": "", "error": "ResultError", "detail": "Claude Code returned an error result: API Error: Connection refused \u2014 a firewall or proxy may be blocking it (ECONNREFUSED) (exit code: 1)"}

@@ -1,0 +1,3 @@
+Ignoring 5 permissions.allow entries from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open"].hasTrustDialogAccepted: true in /Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/.claude/runtime/.claude.json.
+[claude-code:unrecognized_model] {"model":"bikeshare-coder","query_source":"sdk"}
+audited 1 repos; 0 flagged -> reports/audit.jsonl
