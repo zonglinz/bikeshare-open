@@ -119,10 +119,12 @@ pipeline checks. A failed model reply produces an explicit error row;
 one repository failure does not discard the batch. Full model/tool output
 is saved in `reports/audit-transcript.jsonl`.
 
-Exercise 3's teammate audit remains pending until a teammate repository is
-provided. See `docs/AUDIT.md`. Review the proposed decisions and attribution
-before publishing the repository and submitting its URL through the course
-form. A local repository or ZIP has not been submitted to the course.
+Exercise 3's teammate audit is complete for AhmadAgeel/bikeshare-open at
+commit a2192434d64add5b5cb2c7b4008e4ae58c66a3b5. See `docs/AUDIT.md` and
+`reports/peer-review/` for the real reviewer output, checks and assessment.
+The public repository is https://github.com/zonglinz/bikeshare-open.
+Review the proposed decisions and attribution, then submit that URL through
+the course form. No course submission has been sent by the agent.
 
 ### Recorded local audit runtime
 

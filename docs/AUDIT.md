@@ -1,18 +1,45 @@
 # Audit evidence
 
-## Exercise 3: teammate audit — pending
+## Exercise 3: teammate audit
 
-No teammate repository URL or local path has been supplied. No teammate
-repository has been audited, and no `/leakage-auditor` peer output is
-claimed. The assignment requires this evidence; an audit of this project
-cannot stand in for it. This is the outstanding required exercise.
+Repository: [AhmadAgeel/bikeshare-open](https://github.com/AhmadAgeel/bikeshare-open). Reviewed commit: [`a2192434d64add5b5cb2c7b4008e4ae58c66a3b5`](https://github.com/AhmadAgeel/bikeshare-open/commit/a2192434d64add5b5cb2c7b4008e4ae58c66a3b5), branch `master`.
 
-Once the repository is available, run the configured `leakage-auditor`
-reviewer against that repository in a fresh context, paste its actual
-output here verbatim, and add the student's paragraph identifying which
-findings change a number or invalidate a conclusion. Record the teammate's
-URL and reviewed commit. If no findings are returned, preserve the run and
-say so explicitly.
+The configured `leakage-auditor` prompt was run in a fresh Claude Code process with `--agent leakage-auditor`, model `bikeshare-coder` (qwen3.5:0.8b-q8_0, CPU, 64k context). Its five-check prompt was loaded explicitly from our `.claude/agents/leakage-auditor.md`; the actual generated definition and prompt hash are recorded. The reviewer had Read/Grep/Glob tools. Independent pipeline, test and numerical checks were executed before review and supplied as evidence; the reviewer had no Bash or edit access. No teammate source files or remote commits were changed.
+
+Independent checks: `make all test` passed all 17 tests; regenerated `reports/metrics.json` matched the committed bytes. All 714 retained dates and every one-day lag, seven-day lag, seven-day mean and prior-day humidity/temperature interaction matched raw calendar-date calculations. The 14 selected predictors have an empty intersection with `FORBIDDEN`; no subset of one to three selected columns exactly reconstructs `cnt`. The scaler's fitted mean equals the training-only mean. Both baselines appear on validation and test. Exact output and facts are saved in `reports/peer-review/`.
+
+### Verbatim leakage-auditor output
+
+```text
+## Audit Summary
+
+I've reviewed all relevant files and performed a comprehensive audit against the five required checks. Here's the analysis:
+
+### Check 1: Target leakage - **PASS**
+The target `cnt` is shifted by 1 (`out[TARGET].shift(1)`), making it available for prediction. No arithmetic restatement of `casual + registered == cnt` exists in the feature set.
+
+### Check 2: Temporal ordering - **PASS**
+Features are split strictly by date (train on 2011, valid on 2012-06-30, test on 2012-07-01). No transformers see validation/test rows during fit.
+
+### Check 3: Calendar gaps - **PASS**
+`reindex_to_calendar()` uses `pd.date_range()` to create full calendar days, ensuring no gaps in the reindexed frame.
+
+### Check 4: Silent row loss - **PASS**
+The `encode_weather()` function silently converts unknown labels to NaN, which are then dropped by `dropna()`. The test explicitly bounds this loss at exactly 7 rows (LAG_WARMUP + LAG_WARMUP * missing_days).
+
+### Check 5: Unreported baseline - **PASS**
+Both mean baseline and persistence baseline (`cnt_lag_1`) are included in the model results.
+
+---
+
+## Final Conclusion
+
+All five checks pass. The feature experiment is leakage-safe, temporally ordered, calendar-aware, silent row-loss bounded, and both baselines are reported.
+```
+
+### Author's verdict for student review
+
+The reviewer returned no actionable findings. I agree with the verified count-leakage safeguards, chronological split, calendar alignment and baseline reporting. I reject its Check 4 explanation: the actual encoder raises `ValueError` for an unseen label, and the row-loss bound and observed loss are 14 rows (seven warm-up days plus seven following the missing calendar day). Validation spans 2012-01-01 through 2012-06-30; test spans 2012-07-01 through 2012-12-31. These factual corrections repair the explanation while the actual tests and reproduced scores support the conditional comparison. I also identify an availability limitation omitted by the reviewer: `src/features.py:76-77` labels realized same-day weather as available to a forecaster, and the selected inputs include that day's temperature, apparent temperature, humidity, wind and weather severity. The reported scores therefore condition on realized weather; they do not establish operational day-ahead accuracy without archived weather forecasts issued beforehand. The minimal documentation correction is to state that condition, or supply issued forecasts and reevaluate. That limitation changes the forecast/deployment conclusion; no corrected operational score is claimed. This paragraph is an agent-prepared assessment for the student to review and adopt.
 
 ## Own-repository SDK audit
 

@@ -1,0 +1,103 @@
+{
+  "repo_url": "https://github.com/AhmadAgeel/bikeshare-open",
+  "reviewed_commit": "a2192434d64add5b5cb2c7b4008e4ae58c66a3b5",
+  "raw_sha256": "a6bed1577f6e4de56dcfae6d8315985073cc0ad3446c8c99ed60c86a0b5ad9dc",
+  "n_raw": 728,
+  "n_features_rows": 714,
+  "selected_features": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed",
+    "dayofweek",
+    "is_weekend",
+    "is_holiday",
+    "is_workday",
+    "month_sin",
+    "month_cos",
+    "weather_severity",
+    "cnt_lag_1",
+    "cnt_lag_7",
+    "cnt_roll_7"
+  ],
+  "forbidden_intersection": [],
+  "target_identity_hits_subsets_1_to_3": [],
+  "calendar_and_all_lag_values_correct": true,
+  "prior_day_interaction_all_rows_correct": true,
+  "unknown_weather_raises": true,
+  "split_ranges": {
+    "train": {
+      "n": 348,
+      "first": "2011-01-10",
+      "last": "2011-12-31"
+    },
+    "valid": {
+      "n": 182,
+      "first": "2012-01-01",
+      "last": "2012-06-30"
+    },
+    "test": {
+      "n": 184,
+      "first": "2012-07-01",
+      "last": "2012-12-31"
+    }
+  },
+  "scaler_mean_matches_training_only": true,
+  "metrics_match_committed_bytes": true,
+  "metrics_match_reexecuted_function": true,
+  "committed_metrics_sha256": "8ee1e870fdd67c4d9cadecff11d6092481b20332690cad08eb20f345d0a3e8d7",
+  "all_baselines_reported": true,
+  "candidate_metrics_recomputed": {
+    "baseline_mean": {
+      "valid": {
+        "r2": -0.9318,
+        "mae": 2002.2
+      },
+      "test": {
+        "r2": -2.1441,
+        "mae": 2847.7
+      }
+    },
+    "baseline_persistence": {
+      "valid": {
+        "r2": 0.4507,
+        "mae": 900.6
+      },
+      "test": {
+        "r2": 0.5099,
+        "mae": 840.1
+      }
+    },
+    "ridge": {
+      "valid": {
+        "r2": 0.6438,
+        "mae": 841.6
+      },
+      "test": {
+        "r2": 0.5818,
+        "mae": 951.8
+      }
+    },
+    "hgb": {
+      "valid": {
+        "r2": 0.1868,
+        "mae": 1326.4
+      },
+      "test": {
+        "r2": -0.6263,
+        "mae": 2064.5
+      }
+    }
+  },
+  "availability_scope": {
+    "same_day_realized_weather_inputs": [
+      "temp",
+      "atemp",
+      "hum",
+      "windspeed",
+      "weather_severity"
+    ],
+    "weather_forecast_inputs_provided": false,
+    "consequence": "Scores are conditional on realized same-day weather; the repository currently describes a forecast without stating that condition."
+  }
+}

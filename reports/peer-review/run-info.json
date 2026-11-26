@@ -1,0 +1,15 @@
+{
+  "repo_url": "https://github.com/AhmadAgeel/bikeshare-open",
+  "reviewed_commit": "a2192434d64add5b5cb2c7b4008e4ae58c66a3b5",
+  "agent_definition_source": ".claude/agents/leakage-auditor.md",
+  "agent_prompt_sha256": "00b025fc4647db59cc8848744eb08b21d51d6b87abafaae9b73f47304ba51f09",
+  "model": "qwen3.5:0.8b-q8_0 via bikeshare-coder",
+  "exit_code": 0,
+  "fresh_context": true,
+  "tools": [
+    "Read",
+    "Grep",
+    "Glob"
+  ],
+  "evidence_commands": "make all test; independent numeric checks in reports/peer-review/checks.json"
+}

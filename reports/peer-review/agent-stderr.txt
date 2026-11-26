@@ -1,0 +1,1 @@
+[claude-code:unrecognized_model] {"model":"bikeshare-coder","query_source":"sdk"}
