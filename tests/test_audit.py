@@ -52,6 +52,16 @@ def test_auditor_uses_final_structured_message(tmp_path, monkeypatch):
     assert result["audit_engine"] == "claude-agent-sdk"
 
 
+@pytest.mark.parametrize("target,candidates", [("a,b", ["a", "b"]), ("cnt", ["missing"])])
+def test_identity_tool_rejects_invalid_arguments_instead_of_claiming_clean(tmp_path, target, candidates):
+    path = tmp_path / "table.csv"
+    pd.DataFrame({"a": [1, 2], "b": [3, 4], "cnt": [4, 6]}).to_csv(path, index=False)
+    with pytest.raises(ValueError):
+        asyncio.run(audit.check_identity.handler(
+            {"csv_path": str(path), "target": target, "candidates": candidates}
+        ))
+
+
 def test_auditor_reports_malformed_reply_instead_of_crashing(tmp_path, monkeypatch):
     async def query(**kwargs):
         yield FakeResult(result="This is not JSON")

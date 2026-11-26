@@ -50,11 +50,22 @@ from claude_agent_sdk import (
     "check_identity",
     "Test whether any subset of candidate columns is an exact linear "
     "restatement of the target column. Returns the offending subsets.",
-    {"csv_path": str, "target": str, "candidates": list},
+    {"type": "object", "properties": {
+        "csv_path": {"type": "string", "description": "CSV or parquet table path."},
+        "target": {"type": "string", "description": "One target column name: use cnt for bikeshare, never a feature list."},
+        "candidates": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+    }, "required": ["csv_path", "target", "candidates"], "additionalProperties": False},
 )
 async def check_identity(args: dict[str, Any]) -> dict[str, Any]:
     path = Path(args["csv_path"])
     df = pd.read_parquet(path) if path.suffix == ".parquet" else pd.read_csv(path)
+    if args["target"] not in df.columns:
+        raise ValueError("target must be one existing column name; use target='cnt' for bikeshare, not a feature list")
+    if not isinstance(args["candidates"], list) or not args["candidates"]:
+        raise ValueError("candidates must be a nonempty list of individual column names")
+    unknown = set(args["candidates"]) - set(df.columns)
+    if unknown:
+        raise ValueError(f"unknown candidate columns: {sorted(unknown)}")
     cols = [c for c in args["candidates"] if c in df.columns and c != args["target"]]
 
     # Least squares with an intercept column, so `cnt = a*x + b` is caught
@@ -106,14 +117,35 @@ async def verify_pipeline(args):
                 commands[target] = {"exit": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
             actual = copy / "reports/metrics.json"
             metrics = json.loads(actual.read_text()) if actual.exists() else {}
+            identity = None
+            if commands["all"]["exit"] == 0:
+                response = asyncio.run(check_identity.handler({
+                    "csv_path": str(copy / "data/processed/features.parquet"),
+                    "target": "cnt", "candidates": metrics["features"],
+                }))
+                identity = json.loads(response["content"][0]["text"])
             result = {
                 "commands": commands,
                 "reproduced_metrics_byte_for_byte": actual.exists() and actual.read_bytes() == expected,
                 "selected_features": metrics.get("features", []),
                 "metrics": metrics,
+                "identity_check": identity,
                 "processed_table_for_identity_check": str(repo / "data/processed/features.parquet"),
             }
-        return {"content": [{"type": "text", "text": json.dumps(result)}]}
+        evidence_file = repo / "reports/audit-evidence.json"
+        evidence_file.write_text(json.dumps(result, indent=2) + "\n")
+        summary = {
+            "make_all_exit": commands["all"]["exit"],
+            "make_test_exit": commands["test"]["exit"],
+            "tests": commands["test"]["stdout"].splitlines()[-2:],
+            "reproduced_metrics_byte_for_byte": result["reproduced_metrics_byte_for_byte"],
+            "selected_features": result["selected_features"],
+            "identity_check": identity,
+            "model_scores": {name: metrics.get(name) for name in
+                             ["baseline_mean", "baseline_persistence", "ridge", "hgb"]},
+            "full_evidence_file": str(evidence_file),
+        }
+        return {"content": [{"type": "text", "text": json.dumps(summary)}]}
     return await asyncio.to_thread(run)
 
 
@@ -128,8 +160,9 @@ write this code and you have no stake in it passing.
 Check exactly four things:
   1. Target leakage: any selected feature that contains the SAME-DAY target.
      Past-only target lags are legitimate for one-step rolling prediction.
-     Call verify_pipeline first, then check_identity on its selected_features
-     and processed_table_for_identity_check, target cnt. Retained raw columns
+     Call verify_pipeline first: it runs check_identity deterministically on
+     the selected columns with target cnt. Use the separate identity tool
+     for additional investigations if needed. Retained raw columns
      casual/registered/cnt in a table are not inputs unless selected.
   2. Temporal validity: splits by date not at random; every rolling or
      lag feature shifts before it aggregates; no transformer is fit on
@@ -147,6 +180,7 @@ weather was available earlier. Report only findings changing a conclusion.
 
 Your final answer is a single JSON object matching the schema you were
 given. No prose around it.
+Keep the report under 400 words and use at most two material findings.
 """
 
 # Enforced by the SDK: the final turn must validate against this schema and
@@ -209,7 +243,10 @@ async def audit_repo(repo: Path) -> dict[str, Any]:
         setting_sources=["project"],
         strict_mcp_config=True,
         env={**endpoint_env, "CLAUDE_CONFIG_DIR": str(repo / ".claude/runtime"),
-             "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"},
+             "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+             "CLAUDE_CODE_DISABLE_THINKING": "1",
+             "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "1024",
+             "MAX_STRUCTURED_OUTPUT_RETRIES": "2"},
         permission_mode="default",
         max_turns=40,
         thinking={"type": "disabled"},
@@ -222,7 +259,7 @@ async def audit_repo(repo: Path) -> dict[str, Any]:
     # json.loads-ing the lot fails on the first repo that thinks out loud.
     final: ResultMessage | None = None
     try:
-        async for message in query(prompt=f"Audit the repo at {repo}. Call verify_pipeline, then check_identity on only the returned selected_features. Read src/features.py and src/train.py. Return the report schema.", options=options):
+        async for message in query(prompt=f"Audit {repo}. Call verify_pipeline with repo_path={str(repo)!r}; its identity_check is already computed by the deterministic tool on target cnt. Read src/features.py and src/train.py, then return the report schema. Keep the final answer short.", options=options):
             transcript.append(asdict(message) if is_dataclass(message) else str(message))
             if isinstance(message, ResultMessage):
                 final = message
