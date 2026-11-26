@@ -1,0 +1,225 @@
+{
+  "commands": {
+    "all": {
+      "exit": 0,
+      "stdout": "/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/.venv/bin/python -m src.ingest\nOK ingest: 728 rows, 2011-01-03 -> 2012-12-31\n/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/.venv/bin/python -m src.features\nOK features: 714 rows, 14 features -> features.parquet\n  temp, atemp, hum, windspeed, dayofweek, is_weekend, is_holiday, is_workday, month_sin, month_cos, weather_severity, cnt_lag_1, cnt_lag_7, cnt_roll_7\n/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/.venv/bin/python -m src.train\n{\n  \"n_features\": 14,\n  \"n_train\": 348,\n  \"n_valid\": 182,\n  \"n_test\": 184,\n  \"baseline_mean\": {\n    \"valid\": {\n      \"r2\": -0.9318,\n      \"mae\": 2002.2\n    },\n    \"test\": {\n      \"r2\": -2.1441,\n      \"mae\": 2847.7\n    }\n  },\n  \"baseline_persistence\": {\n    \"valid\": {\n      \"r2\": 0.4507,\n      \"mae\": 900.6\n    },\n    \"test\": {\n      \"r2\": 0.5099,\n      \"mae\": 840.1\n    }\n  },\n  \"ridge\": {\n    \"valid\": {\n      \"r2\": 0.6475,\n      \"mae\": 832.9\n    },\n    \"test\": {\n      \"r2\": 0.5833,\n      \"mae\": 947.1\n    }\n  },\n  \"hgb\": {\n    \"valid\": {\n      \"r2\": 0.2185,\n      \"mae\": 1296.6\n    },\n    \"test\": {\n      \"r2\": -0.4975,\n      \"mae\": 1972.6\n    }\n  },\n  \"selected_variant\": \"before_feature\",\n  \"feature_decision\": \"Reject cnt_roll_3 based only on validation; keep its tested implementation for inspection.\"\n}\n",
+      "stderr": ""
+    },
+    "test": {
+      "exit": 0,
+      "stdout": "/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/.venv/bin/python -m pytest tests/ -q\n............................                                             [100%]\n28 passed in 1.57s\n",
+      "stderr": ""
+    }
+  },
+  "reproduced_metrics_byte_for_byte": true,
+  "selected_features": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed",
+    "dayofweek",
+    "is_weekend",
+    "is_holiday",
+    "is_workday",
+    "month_sin",
+    "month_cos",
+    "weather_severity",
+    "cnt_lag_1",
+    "cnt_lag_7",
+    "cnt_roll_7"
+  ],
+  "metrics": {
+    "n_features": 14,
+    "features": [
+      "temp",
+      "atemp",
+      "hum",
+      "windspeed",
+      "dayofweek",
+      "is_weekend",
+      "is_holiday",
+      "is_workday",
+      "month_sin",
+      "month_cos",
+      "weather_severity",
+      "cnt_lag_1",
+      "cnt_lag_7",
+      "cnt_roll_7"
+    ],
+    "n_train": 348,
+    "n_valid": 182,
+    "n_test": 184,
+    "baseline_mean": {
+      "valid": {
+        "r2": -0.9318,
+        "mae": 2002.2
+      },
+      "test": {
+        "r2": -2.1441,
+        "mae": 2847.7
+      }
+    },
+    "baseline_persistence": {
+      "valid": {
+        "r2": 0.4507,
+        "mae": 900.6
+      },
+      "test": {
+        "r2": 0.5099,
+        "mae": 840.1
+      }
+    },
+    "ridge": {
+      "valid": {
+        "r2": 0.6475,
+        "mae": 832.9
+      },
+      "test": {
+        "r2": 0.5833,
+        "mae": 947.1
+      }
+    },
+    "hgb": {
+      "valid": {
+        "r2": 0.2185,
+        "mae": 1296.6
+      },
+      "test": {
+        "r2": -0.4975,
+        "mae": 1972.6
+      }
+    },
+    "selected_variant": "before_feature",
+    "feature_decision": "Reject cnt_roll_3 based only on validation; keep its tested implementation for inspection.",
+    "before_feature": {
+      "n_features": 14,
+      "features": [
+        "temp",
+        "atemp",
+        "hum",
+        "windspeed",
+        "dayofweek",
+        "is_weekend",
+        "is_holiday",
+        "is_workday",
+        "month_sin",
+        "month_cos",
+        "weather_severity",
+        "cnt_lag_1",
+        "cnt_lag_7",
+        "cnt_roll_7"
+      ],
+      "n_train": 348,
+      "n_valid": 182,
+      "n_test": 184,
+      "baseline_mean": {
+        "valid": {
+          "r2": -0.9318,
+          "mae": 2002.2
+        },
+        "test": {
+          "r2": -2.1441,
+          "mae": 2847.7
+        }
+      },
+      "baseline_persistence": {
+        "valid": {
+          "r2": 0.4507,
+          "mae": 900.6
+        },
+        "test": {
+          "r2": 0.5099,
+          "mae": 840.1
+        }
+      },
+      "ridge": {
+        "valid": {
+          "r2": 0.6475,
+          "mae": 832.9
+        },
+        "test": {
+          "r2": 0.5833,
+          "mae": 947.1
+        }
+      },
+      "hgb": {
+        "valid": {
+          "r2": 0.2185,
+          "mae": 1296.6
+        },
+        "test": {
+          "r2": -0.4975,
+          "mae": 1972.6
+        }
+      }
+    },
+    "after_feature": {
+      "n_features": 15,
+      "features": [
+        "temp",
+        "atemp",
+        "hum",
+        "windspeed",
+        "dayofweek",
+        "is_weekend",
+        "is_holiday",
+        "is_workday",
+        "month_sin",
+        "month_cos",
+        "weather_severity",
+        "cnt_lag_1",
+        "cnt_lag_7",
+        "cnt_roll_7",
+        "cnt_roll_3"
+      ],
+      "n_train": 348,
+      "n_valid": 182,
+      "n_test": 184,
+      "baseline_mean": {
+        "valid": {
+          "r2": -0.9318,
+          "mae": 2002.2
+        },
+        "test": {
+          "r2": -2.1441,
+          "mae": 2847.7
+        }
+      },
+      "baseline_persistence": {
+        "valid": {
+          "r2": 0.4507,
+          "mae": 900.6
+        },
+        "test": {
+          "r2": 0.5099,
+          "mae": 840.1
+        }
+      },
+      "ridge": {
+        "valid": {
+          "r2": 0.6439,
+          "mae": 836.5
+        },
+        "test": {
+          "r2": 0.58,
+          "mae": 946.2
+        }
+      },
+      "hgb": {
+        "valid": {
+          "r2": 0.1983,
+          "mae": 1311.6
+        },
+        "test": {
+          "r2": -0.5338,
+          "mae": 1998.7
+        }
+      }
+    }
+  },
+  "identity_check": {
+    "verdict": "clean",
+    "identities": []
+  },
+  "processed_table_for_identity_check": "/Users/zonglinzhang/Documents/Codex/2026-11-25/x20/outputs/bikeshare-open/data/processed/features.parquet"
+}

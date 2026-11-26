@@ -1,0 +1,21 @@
+{
+  "verified_commit": "cce4e2cd20b086b0867b5aa4c77f0d8392564858",
+  "clean_clone": true,
+  "same_pinned_environment": true,
+  "make_all_exit": 0,
+  "make_test_exit": 0,
+  "metrics_identical_bytes": true,
+  "metrics_sha256": "3b2388d68f2f88956a6648d9142c3a9d47f93a1ea66b961fe88d129194b26760",
+  "raw_sha256": "a6bed1577f6e4de56dcfae6d8315985073cc0ad3446c8c99ed60c86a0b5ad9dc",
+  "latest_sdk_fresh_copy_check": {
+    "code_commit": "b8c0e7c41dd212ec4d4991761e9389909ec5b318",
+    "make_all_exit": 0,
+    "make_test_exit": 0,
+    "test_summary": "28 passed in 1.57s",
+    "metrics_identical_bytes": true,
+    "identity_check": {
+      "verdict": "clean",
+      "identities": []
+    }
+  }
+}
